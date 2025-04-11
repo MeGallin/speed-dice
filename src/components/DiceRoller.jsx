@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { atom, useAtom } from 'jotai';
 import './Dice.css';
 import { rollHistoryAtom } from './GameHistory';
+
+// Function to get player icon based on index
+const getPlayerIcon = (index) => {
+  const icons = ['👑', '🚀', '🏆', '🎯', '🎮', '🎲'];
+  return icons[index % icons.length];
+};
 import {
   generateDiceValues,
   getSpecialRollType,
   getSpecialRollMessage,
   getSpecialRollClass,
   calculateTotal,
+  getNextPlayer,
 } from '../utils/diceLogic';
 import {
   doubleTroubleAtom,
@@ -36,6 +43,7 @@ export const gameStartedAtom = atom(false); // Track if the game has started
 const DiceRoller = () => {
   // Local state for animation
   const [isRolling, setIsRolling] = useState(false);
+  const [isAnimatingNextPlayer, setIsAnimatingNextPlayer] = useState(false);
 
   // Global state
   const [diceCount, setDiceCount] = useAtom(diceCountAtom);
@@ -52,8 +60,8 @@ const DiceRoller = () => {
 
   // Global state for roll history and player tracking
   const [rollHistory, setRollHistory] = useAtom(rollHistoryAtom);
-  const [currentPlayer] = useAtom(currentPlayerAtom);
-  const [playerCount] = useAtom(playerCountAtom);
+  const [currentPlayer, setCurrentPlayer] = useAtom(currentPlayerAtom);
+  const [playerCount, setPlayerCount] = useAtom(playerCountAtom);
   const [hasRolled, setHasRolled] = useAtom(hasRolledAtom);
 
   // Global state for game tracking
@@ -139,6 +147,40 @@ const DiceRoller = () => {
     setSpecialRoll(null);
   };
 
+  // Handle next player button click
+  const handleNextPlayer = () => {
+    setIsAnimatingNextPlayer(true);
+
+    // Short delay for animation
+    setTimeout(() => {
+      // Only consider doubles for next player logic if doubleTrouble is enabled
+      const effectiveSpecialRoll = doubleTrouble ? specialRoll : null;
+      const nextPlayer = getNextPlayer(
+        currentPlayer,
+        playerCount,
+        effectiveSpecialRoll,
+      );
+
+      // Update the current player atom
+      setCurrentPlayer(nextPlayer);
+
+      // Reset the hasRolled state for the new player
+      setHasRolled(false);
+
+      setIsAnimatingNextPlayer(false);
+    }, 300);
+  };
+
+  // Reset the game state
+  const resetGame = () => {
+    setGameStarted(false);
+    setHasRolled(false);
+    setCurrentPlayer(0);
+    setSpecialRoll(null);
+    setDiceValues([1, 1, 1]);
+    setRollHistory([]);
+  };
+
   // Render a single die
   const renderDie = (value, index) => {
     // Determine if this die is part of a special roll
@@ -146,7 +188,7 @@ const DiceRoller = () => {
 
     // Apply different animations based on the roll type
     const getAnimationClass = () => {
-      if (isRolling) return '';
+      if (isRolling) return 'enhanced-rolling';
       if (specialRoll === 'double' || specialRoll === 'triple')
         return 'shaking';
       if (specialRoll === 'sequence') return 'bouncing';
@@ -156,27 +198,27 @@ const DiceRoller = () => {
     return (
       <motion.div
         key={index}
-        className={`die ${!isRolling ? `die-${value}` : ''} ${
+        className={`die enhanced-die ${!isRolling ? `die-${value}` : ''} ${
           isSpecial ? 'special' : ''
         } ${getAnimationClass()}`}
         animate={{
           rotate: isRolling ? [0, 360, 720, 1080] : 0,
           scale: isRolling ? [1, 1.2, 0.8, 1] : isSpecial ? [1, 1.1, 1] : 1,
-          x: isRolling ? [0, -10, 10, -10, 10, 0] : 0,
-          y: isRolling ? [0, -5, 5, -5, 5, 0] : 0,
+          x: isRolling ? [0, -15, 15, -15, 15, 0] : 0,
+          y: isRolling ? [0, -20, 10, -15, 5, 0] : 0,
           boxShadow: isSpecial
             ? [
                 '0 4px 8px rgba(0,0,0,0.2)',
-                '0 0 15px rgba(255,215,0,0.7)',
+                '0 0 20px rgba(255, 215, 0, 0.8)',
                 '0 4px 8px rgba(0,0,0,0.2)',
               ]
             : '0 4px 8px rgba(0,0,0,0.2)',
         }}
         transition={{
-          duration: isRolling ? 0.6 : 0.3,
+          duration: isRolling ? 0.8 : 0.3,
           ease: 'easeInOut',
-          x: { duration: 0.3, ease: 'easeInOut' },
-          y: { duration: 0.3, ease: 'easeInOut' },
+          x: { duration: 0.4, ease: 'easeInOut' },
+          y: { duration: 0.4, ease: 'easeInOut' },
           scale: {
             duration: isSpecial ? 1.5 : 0.6,
             repeat: isSpecial ? Infinity : 0,
@@ -189,56 +231,157 @@ const DiceRoller = () => {
           },
         }}
       >
-        {isRolling && '?'}
+        {isRolling ? (
+          <motion.span
+            animate={{ opacity: [1, 0.5, 1], rotate: [0, 180, 360] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+            className="text-2xl"
+          >
+            ?
+          </motion.span>
+        ) : null}
       </motion.div>
     );
   };
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
-      {/* Dice Count Toggle */}
-      <div className="flex items-center gap-2">
-        <span className="text-lg">Dice:</span>
-        <button
-          onClick={toggleDiceCount}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          {diceCount === 2 ? 'Switch to 3 Dice' : 'Switch to 2 Dice'}
-        </button>
+      {/* Top Controls Row - Side by Side */}
+      <div className="w-full max-w-md grid grid-cols-2 gap-3 mb-2">
+        {/* Dice Switch */}
+
+        <div className="flex items-center justify-center bg-gray-100 text-white p-3 rounded-lg shadow-md">
+          <motion.button
+            onClick={toggleDiceCount}
+            className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-bold text-sm"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {diceCount === 2 ? '3 Dice' : '2 Dice'}
+          </motion.button>
+        </div>
+
+        {/* Current Player Display */}
+        <div className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg">
+          <div className="flex-shrink-0">
+            <motion.div
+              className={`player-token w-10 h-10 text-lg ${
+                playerColors[currentPlayer].split(' ')[0]
+              }`}
+              animate={{
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  '0 4px 8px rgba(0,0,0,0.2)',
+                  '0 8px 16px rgba(0,0,0,0.3)',
+                  '0 4px 8px rgba(0,0,0,0.2)',
+                ],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatType: 'reverse',
+              }}
+            >
+              {getPlayerIcon(currentPlayer)}
+            </motion.div>
+          </div>
+          <div className="flex-grow">
+            <div className="text-xs font-medium text-gray-500">
+              Current Player:
+            </div>
+            <div
+              className={`font-bold ${
+                currentPlayer === 0
+                  ? 'text-blue-600'
+                  : currentPlayer === 1
+                  ? 'text-red-600'
+                  : currentPlayer === 2
+                  ? 'text-green-600'
+                  : currentPlayer === 3
+                  ? 'text-yellow-600'
+                  : currentPlayer === 4
+                  ? 'text-purple-600'
+                  : 'text-pink-600'
+              }`}
+            >
+              Player {currentPlayer + 1}
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            {/* Player Tokens - Smaller to fit 6 players */}
+            <div className="flex flex-wrap gap-1 max-w-[90px] justify-end">
+              {Array.from({ length: playerCount }).map((_, index) => (
+                <motion.div
+                  key={index}
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    index === currentPlayer
+                      ? playerColors[index].split(' ')[0]
+                      : 'bg-gray-300'
+                  } ${
+                    index === currentPlayer ? 'text-white' : 'text-gray-700'
+                  }`}
+                  animate={{
+                    scale: index === currentPlayer ? 1.2 : 1,
+                    y: index === currentPlayer ? -2 : 0,
+                  }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  {index + 1}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Dice Display */}
-      <div className="dice-container">
-        <div className="flex gap-4 justify-center">
+      {/* Dice Display with Total Score */}
+      <div className="w-full max-w-md relative">
+        {/* Total Value - Centered above dice */}
+        <div className="flex justify-center mb-0">
+          <motion.div
+            key={totalValue} // Force re-render on value change
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <div className="text-red-600 font-bold text-2xl">
+              <span className="text-3xl font-bold">
+                {isRolling ? '?' : totalValue}
+              </span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Dice */}
+        <div className="flex justify-around py-6 px-4">
           {diceValues
             .slice(0, diceCount)
             .map((value, index) => renderDie(value, index))}
         </div>
+
+        {/* Special Roll Display */}
+        <AnimatePresence>
+          {specialRoll && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className={`special-roll-banner ${getSpecialRollClass(
+                specialRoll,
+              )}`}
+            >
+              {getSpecialRollMessage(specialRoll)}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Total Value */}
-      <div className="text-2xl font-bold">
-        Total: {isRolling ? '?' : totalValue}
-      </div>
-
-      {/* Special Roll Display */}
-      {specialRoll && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`text-xl font-bold p-2 rounded-lg ${getSpecialRollClass(
-            specialRoll,
-          )}`}
-        >
-          {getSpecialRollMessage(specialRoll)}
-        </motion.div>
-      )}
-
-      {/* Roll Button */}
-      <div className="w-full max-w-md mt-4">
+      {/* Game Controls */}
+      <div className="w-full max-w-md mt-4 flex flex-col gap-3">
+        {/* Roll Button */}
         <motion.button
           onClick={rollDice}
-          className={`w-full py-6 text-white text-2xl font-bold rounded-xl shadow-lg transition-colors ${
+          className={`roll-button w-full py-6 text-white text-2xl font-bold rounded-xl shadow-lg transition-colors ${
             hasRolled && !(specialRoll === 'double' && doubleTrouble)
               ? 'bg-gray-500 cursor-not-allowed'
               : playerColors[currentPlayer]
@@ -278,24 +421,80 @@ const DiceRoller = () => {
             (hasRolled && !(specialRoll === 'double' && doubleTrouble))
           }
         >
-          {isRolling
-            ? 'Rolling...'
-            : hasRolled && !(specialRoll === 'double' && doubleTrouble)
-            ? 'Waiting for Next Player'
-            : 'Roll Dice'}
+          <div className="flex items-center justify-center gap-2">
+            {isRolling ? (
+              <span>Rolling...</span>
+            ) : hasRolled && !(specialRoll === 'double' && doubleTrouble) ? (
+              <span>Waiting for Next Player</span>
+            ) : (
+              <>
+                <span>Roll Dice</span>
+                <span className="text-xl">🎲</span>
+              </>
+            )}
+          </div>
         </motion.button>
 
-        {/* Next Player Indicator */}
+        {/* Next Turn Button */}
+        {hasRolled && !(specialRoll === 'double' && doubleTrouble) && (
+          <motion.button
+            onClick={handleNextPlayer}
+            className="w-full p-4 text-white rounded-lg font-bold text-lg bg-green-600 hover:bg-green-700 transition-colors"
+            whileHover={{ scale: 1.03 }}
+            animate={{
+              boxShadow: [
+                '0 0 5px rgba(22, 163, 74, 0.3)',
+                '0 0 20px rgba(22, 163, 74, 0.6)',
+                '0 0 5px rgba(22, 163, 74, 0.3)',
+              ],
+              y: [0, -3, 0],
+            }}
+            transition={{
+              y: { repeat: Infinity, duration: 1.5, repeatType: 'reverse' },
+              boxShadow: {
+                repeat: Infinity,
+                duration: 1.5,
+                repeatType: 'reverse',
+              },
+            }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span>Next Turn</span>
+              <span className="text-xl">➡️</span>
+            </div>
+          </motion.button>
+        )}
+
+        {/* Turn Indicators */}
         {!isRolling && !hasRolled && (
-          <p className="text-center mt-2 text-gray-600">
-            Player {currentPlayer + 1}'s turn
+          <p className="text-center text-gray-600 font-medium">
+            Player {currentPlayer + 1}'s turn {getPlayerIcon(currentPlayer)}
           </p>
         )}
 
         {hasRolled && !(specialRoll === 'double' && doubleTrouble) && (
-          <p className="text-center mt-2 text-gray-600">
-            Next: Player {((currentPlayer + 1) % playerCount) + 1}
+          <p className="text-center text-green-600 font-medium">
+            Click "Next Turn" to continue with Player{' '}
+            {((currentPlayer + 1) % playerCount) + 1}{' '}
+            {getPlayerIcon((currentPlayer + 1) % playerCount)}
           </p>
+        )}
+
+        {/* Reset Game Button */}
+        {gameStarted && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <motion.button
+              onClick={resetGame}
+              className="w-full p-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Reset Game
+            </motion.button>
+            <p className="text-xs text-gray-500 mt-1 text-center">
+              This will reset all game progress and allow changing player count
+            </p>
+          </div>
         )}
       </div>
     </div>

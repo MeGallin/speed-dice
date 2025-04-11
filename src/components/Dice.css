@@ -7,11 +7,11 @@
 /* Basic die styling */
 .die {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -45,52 +45,58 @@
 /* Dice dots */
 .die-1::after {
   content: '⚀';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .die-2::after {
   content: '⚁';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .die-3::after {
   content: '⚂';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .die-4::after {
   content: '⚃';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .die-5::after {
   content: '⚄';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .die-6::after {
   content: '⚅';
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3.5rem;
+  color: #222;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Die shadow */
 .die::before {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: -8px;
   left: 5%;
   width: 90%;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  height: 15px;
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 50%;
   z-index: -1;
-  filter: blur(5px);
+  filter: blur(6px);
   opacity: 0.8;
   transition: all 0.3s ease;
 }
@@ -166,7 +172,16 @@
 
 /* Glow effect for special rolls */
 .die.special {
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+/* Enhanced die styling */
+.enhanced-die {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.05),
+    inset 0 2px 5px rgba(255, 255, 255, 0.8);
 }
 
 /* History dice styling */
