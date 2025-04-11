@@ -1,0 +1,65 @@
+.die {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Dice dots */
+.die-1::after {
+  content: '⚀';
+  font-size: 2.5rem;
+}
+
+.die-2::after {
+  content: '⚁';
+  font-size: 2.5rem;
+}
+
+.die-3::after {
+  content: '⚂';
+  font-size: 2.5rem;
+}
+
+.die-4::after {
+  content: '⚃';
+  font-size: 2.5rem;
+}
+
+.die-5::after {
+  content: '⚄';
+  font-size: 2.5rem;
+}
+
+.die-6::after {
+  content: '⚅';
+  font-size: 2.5rem;
+}
+
+/* Dice animation */
+@keyframes roll {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(180deg) rotateY(90deg);
+  }
+  50% {
+    transform: rotateX(360deg) rotateY(180deg);
+  }
+  75% {
+    transform: rotateX(180deg) rotateY(270deg);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(360deg);
+  }
+}
+
+.rolling {
+  animation: roll 0.6s ease-out;
+}
