@@ -169,6 +169,55 @@
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
 }
 
+/* History dice styling */
+.history-die {
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.history-die.die-1::after {
+  content: '⚀';
+  font-size: 1rem;
+  color: #333;
+}
+
+.history-die.die-2::after {
+  content: '⚁';
+  font-size: 1rem;
+  color: #333;
+}
+
+.history-die.die-3::after {
+  content: '⚂';
+  font-size: 1rem;
+  color: #333;
+}
+
+.history-die.die-4::after {
+  content: '⚃';
+  font-size: 1rem;
+  color: #333;
+}
+
+.history-die.die-5::after {
+  content: '⚄';
+  font-size: 1rem;
+  color: #333;
+}
+
+.history-die.die-6::after {
+  content: '⚅';
+  font-size: 1rem;
+  color: #333;
+}
+
 /* Responsive sizing */
 @media (max-width: 768px) {
   .die {
@@ -183,6 +232,20 @@
   .die-5::after,
   .die-6::after {
     font-size: 2rem;
+  }
+
+  .history-die {
+    width: 20px;
+    height: 20px;
+  }
+
+  .history-die.die-1::after,
+  .history-die.die-2::after,
+  .history-die.die-3::after,
+  .history-die.die-4::after,
+  .history-die.die-5::after,
+  .history-die.die-6::after {
+    font-size: 0.85rem;
   }
 }
 
@@ -199,5 +262,19 @@
   .die-5::after,
   .die-6::after {
     font-size: 1.5rem;
+  }
+
+  .history-die {
+    width: 18px;
+    height: 18px;
+  }
+
+  .history-die.die-1::after,
+  .history-die.die-2::after,
+  .history-die.die-3::after,
+  .history-die.die-4::after,
+  .history-die.die-5::after,
+  .history-die.die-6::after {
+    font-size: 0.75rem;
   }
 }
