@@ -1,7 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { atom, useAtom } from 'jotai';
 import './Dice.css';
+import {
+  generateDiceValues,
+  getSpecialRollType,
+  getSpecialRollMessage,
+  getSpecialRollClass,
+  calculateTotal,
+} from '../utils/diceLogic';
+import {
+  doubleTroubleAtom,
+  tripleThreatAtom,
+  sequenceBonusAtom,
+} from './GameSettings';
 
 // Atoms for global state
 export const diceCountAtom = atom(2); // Default to 2 dice
@@ -9,9 +21,11 @@ export const diceValuesAtom = atom([1, 1, 1]); // Default values for 3 dice
 export const totalValueAtom = atom((get) => {
   const values = get(diceValuesAtom);
   const count = get(diceCountAtom);
-  return values.slice(0, count).reduce((sum, value) => sum + value, 0);
+  return calculateTotal(values.slice(0, count));
 });
 export const specialRollAtom = atom(null); // For storing special roll types
+export const playerCountAtom = atom(2); // Default to 2 players
+export const currentPlayerAtom = atom(0); // Default to first player
 
 const DiceRoller = () => {
   // Local state for animation
@@ -23,6 +37,11 @@ const DiceRoller = () => {
   const [totalValue] = useAtom(totalValueAtom);
   const [specialRoll, setSpecialRoll] = useAtom(specialRollAtom);
 
+  // Get game settings
+  const [doubleTrouble] = useAtom(doubleTroubleAtom);
+  const [tripleThreat] = useAtom(tripleThreatAtom);
+  const [sequenceBonus] = useAtom(sequenceBonusAtom);
+
   // Function to roll the dice
   const rollDice = () => {
     // Start rolling animation
@@ -31,48 +50,29 @@ const DiceRoller = () => {
 
     // Generate random dice values after a short delay
     setTimeout(() => {
-      const newValues = Array(diceCount)
-        .fill(0)
-        .map(() => Math.floor(Math.random() * 6) + 1);
+      const newValues = generateDiceValues(diceCount);
 
       // If we're only using 2 dice, keep the third dice value but don't show it
       if (diceCount === 2) {
-        newValues.push(diceValues[2]);
+        newValues.push(diceValues[2] || 1);
       }
 
       setDiceValues(newValues);
-      checkSpecialRolls(newValues.slice(0, diceCount));
+
+      // Check for special roll patterns based on enabled rules
+      const rollType = getSpecialRollType(newValues.slice(0, diceCount));
+
+      // Only set special roll if the corresponding rule is enabled
+      if (
+        (rollType === 'double' && doubleTrouble) ||
+        (rollType === 'triple' && tripleThreat) ||
+        (rollType === 'sequence' && sequenceBonus)
+      ) {
+        setSpecialRoll(rollType);
+      }
+
       setIsRolling(false);
     }, 600);
-  };
-
-  // Check for special roll patterns
-  const checkSpecialRolls = (values) => {
-    // Check for doubles (only in 2-dice mode)
-    if (diceCount === 2 && values[0] === values[1]) {
-      setSpecialRoll('double');
-      return;
-    }
-
-    // Check for triples (only in 3-dice mode)
-    if (diceCount === 3 && values[0] === values[1] && values[1] === values[2]) {
-      setSpecialRoll('triple');
-      return;
-    }
-
-    // Check for sequence (only in 3-dice mode)
-    if (diceCount === 3) {
-      const sorted = [...values].sort((a, b) => a - b);
-      if (
-        (sorted[0] + 1 === sorted[1] && sorted[1] + 1 === sorted[2]) || // e.g., 1-2-3
-        (sorted[0] === 1 && sorted[1] === 2 && sorted[2] === 4) || // Special case 1-2-4
-        (sorted[0] === 1 && sorted[1] === 3 && sorted[2] === 5) || // Special case 1-3-5
-        (sorted[0] === 2 && sorted[1] === 4 && sorted[2] === 6) // Special case 2-4-6
-      ) {
-        setSpecialRoll('sequence');
-        return;
-      }
-    }
   };
 
   // Toggle between 2 and 3 dice
@@ -128,18 +128,11 @@ const DiceRoller = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`text-xl font-bold p-2 rounded-lg ${
-            specialRoll === 'double'
-              ? 'bg-yellow-200 text-yellow-800'
-              : specialRoll === 'triple'
-              ? 'bg-red-200 text-red-800'
-              : 'bg-green-200 text-green-800'
-          }`}
+          className={`text-xl font-bold p-2 rounded-lg ${getSpecialRollClass(
+            specialRoll,
+          )}`}
         >
-          {specialRoll === 'double' && '🎯 Double! Roll Again!'}
-          {specialRoll === 'triple' &&
-            '🔥 Triple Threat! Collect from each player!'}
-          {specialRoll === 'sequence' && '✨ Sequence! Bonus Activated!'}
+          {getSpecialRollMessage(specialRoll)}
         </motion.div>
       )}
 
