@@ -30,6 +30,8 @@ export const totalValueAtom = atom((get) => {
 export const specialRollAtom = atom(null); // For storing special roll types
 export const playerCountAtom = atom(2); // Default to 2 players
 export const currentPlayerAtom = atom(0); // Default to first player
+export const hasRolledAtom = atom(false); // Track if current player has rolled
+export const gameStartedAtom = atom(false); // Track if the game has started
 
 const DiceRoller = () => {
   // Local state for animation
@@ -48,15 +50,38 @@ const DiceRoller = () => {
   const [enableVibration] = useAtom(enableVibrationAtom);
   const [enableSound] = useAtom(enableSoundAtom);
 
-  // Global state for roll history
+  // Global state for roll history and player tracking
   const [rollHistory, setRollHistory] = useAtom(rollHistoryAtom);
   const [currentPlayer] = useAtom(currentPlayerAtom);
+  const [playerCount] = useAtom(playerCountAtom);
+  const [hasRolled, setHasRolled] = useAtom(hasRolledAtom);
+
+  // Global state for game tracking
+  const [gameStarted, setGameStarted] = useAtom(gameStartedAtom);
+
+  // Player colors for visual distinction (matching PlayerManager)
+  const playerColors = [
+    'bg-blue-500 hover:bg-blue-600',
+    'bg-red-500 hover:bg-red-600',
+    'bg-green-500 hover:bg-green-600',
+    'bg-yellow-500 hover:bg-yellow-600',
+    'bg-purple-500 hover:bg-purple-600',
+    'bg-pink-500 hover:bg-pink-600',
+  ];
 
   // Function to roll the dice
   const rollDice = () => {
     // Start rolling animation
     setIsRolling(true);
     setSpecialRoll(null);
+
+    // Mark that the current player has rolled
+    setHasRolled(true);
+
+    // Mark that the game has started (after first roll)
+    if (!gameStarted) {
+      setGameStarted(true);
+    }
 
     // Provide initial feedback
     provideFeedback(null, enableVibration, enableSound);
@@ -210,31 +235,69 @@ const DiceRoller = () => {
       )}
 
       {/* Roll Button */}
-      <motion.button
-        onClick={rollDice}
-        className="mt-4 px-8 py-4 bg-red-500 text-white text-xl font-bold rounded-full shadow-lg hover:bg-red-600 transition-colors"
-        whileHover={{
-          scale: 1.05,
-          boxShadow: '0 0 15px rgba(255, 0, 0, 0.5)',
-        }}
-        whileTap={{
-          scale: 0.95,
-          boxShadow: '0 0 5px rgba(255, 0, 0, 0.5)',
-        }}
-        animate={{
-          scale: isRolling ? [1, 1.05, 0.95, 1.05, 0.95, 1] : 1,
-          rotate: isRolling ? [0, -1, 1, -1, 1, 0] : 0,
-        }}
-        transition={{
-          duration: 0.5,
-          ease: 'easeInOut',
-          scale: { repeat: isRolling ? Infinity : 0 },
-          rotate: { repeat: isRolling ? Infinity : 0 },
-        }}
-        disabled={isRolling}
-      >
-        {isRolling ? 'Rolling...' : 'Roll Dice'}
-      </motion.button>
+      <div className="w-full max-w-md mt-4">
+        <motion.button
+          onClick={rollDice}
+          className={`w-full py-6 text-white text-2xl font-bold rounded-xl shadow-lg transition-colors ${
+            hasRolled && !(specialRoll === 'double' && doubleTrouble)
+              ? 'bg-gray-500 cursor-not-allowed'
+              : playerColors[currentPlayer]
+          }`}
+          whileHover={{
+            scale:
+              hasRolled && !(specialRoll === 'double' && doubleTrouble)
+                ? 1
+                : 1.02,
+            boxShadow:
+              hasRolled && !(specialRoll === 'double' && doubleTrouble)
+                ? '0 4px 8px rgba(0,0,0,0.2)'
+                : '0 0 20px rgba(0, 0, 0, 0.3)',
+          }}
+          whileTap={{
+            scale:
+              hasRolled && !(specialRoll === 'double' && doubleTrouble)
+                ? 1
+                : 0.98,
+            boxShadow:
+              hasRolled && !(specialRoll === 'double' && doubleTrouble)
+                ? '0 4px 8px rgba(0,0,0,0.2)'
+                : '0 0 10px rgba(0, 0, 0, 0.2)',
+          }}
+          animate={{
+            scale: isRolling ? [1, 1.05, 0.95, 1.05, 0.95, 1] : 1,
+            rotate: isRolling ? [0, -1, 1, -1, 1, 0] : 0,
+          }}
+          transition={{
+            duration: 0.5,
+            ease: 'easeInOut',
+            scale: { repeat: isRolling ? Infinity : 0 },
+            rotate: { repeat: isRolling ? Infinity : 0 },
+          }}
+          disabled={
+            isRolling ||
+            (hasRolled && !(specialRoll === 'double' && doubleTrouble))
+          }
+        >
+          {isRolling
+            ? 'Rolling...'
+            : hasRolled && !(specialRoll === 'double' && doubleTrouble)
+            ? 'Waiting for Next Player'
+            : 'Roll Dice'}
+        </motion.button>
+
+        {/* Next Player Indicator */}
+        {!isRolling && !hasRolled && (
+          <p className="text-center mt-2 text-gray-600">
+            Player {currentPlayer + 1}'s turn
+          </p>
+        )}
+
+        {hasRolled && !(specialRoll === 'double' && doubleTrouble) && (
+          <p className="text-center mt-2 text-gray-600">
+            Next: Player {((currentPlayer + 1) % playerCount) + 1}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
