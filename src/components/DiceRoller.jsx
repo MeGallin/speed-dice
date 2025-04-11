@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { atom, useAtom } from 'jotai';
 import './Dice.css';
+import { rollHistoryAtom } from './GameHistory';
 import {
   generateDiceValues,
   getSpecialRollType,
@@ -47,6 +48,10 @@ const DiceRoller = () => {
   const [enableVibration] = useAtom(enableVibrationAtom);
   const [enableSound] = useAtom(enableSoundAtom);
 
+  // Global state for roll history
+  const [rollHistory, setRollHistory] = useAtom(rollHistoryAtom);
+  const [currentPlayer] = useAtom(currentPlayerAtom);
+
   // Function to roll the dice
   const rollDice = () => {
     // Start rolling animation
@@ -83,6 +88,21 @@ const DiceRoller = () => {
         // Provide special roll feedback
         provideFeedback(effectiveRollType, enableVibration, enableSound);
       }
+
+      // Calculate total for the rolled dice
+      const total = calculateTotal(newValues.slice(0, diceCount));
+
+      // Add roll to history
+      setRollHistory((prev) => [
+        {
+          values: newValues.slice(0, diceCount),
+          total,
+          specialRoll: effectiveRollType,
+          player: currentPlayer,
+          timestamp: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
 
       setIsRolling(false);
     }, 600);

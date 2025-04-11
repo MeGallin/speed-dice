@@ -2,6 +2,7 @@ import './App.css';
 import DiceRoller from './components/DiceRoller';
 import PlayerManager from './components/PlayerManager';
 import GameSettings from './components/GameSettings';
+import GameHistory from './components/GameHistory';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <GameSettings />
         <DiceRoller />
         <PlayerManager />
+        <GameHistory />
       </div>
     </div>
   );
