@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { atom, useAtom } from 'jotai';
 import { motion } from 'framer-motion';
 import { diceCountAtom } from './DiceRoller';
+import { isVibrationSupported } from '../utils/feedbackEffects';
 
 // Atoms for game settings
 export const doubleTroubleAtom = atom(true); // Roll again on doubles
 export const tripleThreatAtom = atom(true); // Get paid on triples
 export const sequenceBonusAtom = atom(true); // Trigger mystery event on sequence
 export const speedModeAtom = atom(false); // Auto-selects 3 dice and bonus rules
+
+// Atoms for feedback settings
+export const enableVibrationAtom = atom(isVibrationSupported()); // Enable vibration feedback
+export const enableSoundAtom = atom(true); // Enable sound feedback
 
 const GameSettings = () => {
   // Global state
@@ -16,6 +21,11 @@ const GameSettings = () => {
   const [sequenceBonus, setSequenceBonus] = useAtom(sequenceBonusAtom);
   const [speedMode, setSpeedMode] = useAtom(speedModeAtom);
   const [diceCount, setDiceCount] = useAtom(diceCountAtom);
+  const [enableVibration, setEnableVibration] = useAtom(enableVibrationAtom);
+  const [enableSound, setEnableSound] = useAtom(enableSoundAtom);
+
+  // Check if vibration is supported
+  const vibrationSupported = isVibrationSupported();
 
   // Local state
   const [isOpen, setIsOpen] = useState(false);
@@ -100,6 +110,56 @@ const GameSettings = () => {
                   onChange={handleSpeedModeToggle}
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          {/* Feedback Settings */}
+          <div className="mb-6 p-3 bg-gray-100 rounded-lg">
+            <h4 className="font-bold mb-3">Feedback Settings</h4>
+
+            {/* Sound Toggle */}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h4 className="font-medium">Sound Effects</h4>
+                <p className="text-sm text-gray-600">
+                  Play sounds during dice rolls
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={enableSound}
+                  onChange={() => setEnableSound(!enableSound)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {/* Vibration Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium">Vibration</h4>
+                <p className="text-sm text-gray-600">
+                  {vibrationSupported
+                    ? 'Vibrate device during dice rolls'
+                    : 'Not supported on this device'}
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={enableVibration}
+                  onChange={() => setEnableVibration(!enableVibration)}
+                  disabled={!vibrationSupported}
+                />
+                <div
+                  className={`w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 ${
+                    !vibrationSupported ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                ></div>
               </label>
             </div>
           </div>

@@ -13,7 +13,10 @@ import {
   doubleTroubleAtom,
   tripleThreatAtom,
   sequenceBonusAtom,
+  enableVibrationAtom,
+  enableSoundAtom,
 } from './GameSettings';
+import { provideFeedback } from '../utils/feedbackEffects';
 
 // Atoms for global state
 export const diceCountAtom = atom(2); // Default to 2 dice
@@ -41,12 +44,17 @@ const DiceRoller = () => {
   const [doubleTrouble] = useAtom(doubleTroubleAtom);
   const [tripleThreat] = useAtom(tripleThreatAtom);
   const [sequenceBonus] = useAtom(sequenceBonusAtom);
+  const [enableVibration] = useAtom(enableVibrationAtom);
+  const [enableSound] = useAtom(enableSoundAtom);
 
   // Function to roll the dice
   const rollDice = () => {
     // Start rolling animation
     setIsRolling(true);
     setSpecialRoll(null);
+
+    // Provide initial feedback
+    provideFeedback(null, enableVibration, enableSound);
 
     // Generate random dice values after a short delay
     setTimeout(() => {
@@ -63,12 +71,17 @@ const DiceRoller = () => {
       const rollType = getSpecialRollType(newValues.slice(0, diceCount));
 
       // Only set special roll if the corresponding rule is enabled
+      let effectiveRollType = null;
       if (
         (rollType === 'double' && doubleTrouble) ||
         (rollType === 'triple' && tripleThreat) ||
         (rollType === 'sequence' && sequenceBonus)
       ) {
         setSpecialRoll(rollType);
+        effectiveRollType = rollType;
+
+        // Provide special roll feedback
+        provideFeedback(effectiveRollType, enableVibration, enableSound);
       }
 
       setIsRolling(false);
@@ -83,15 +96,53 @@ const DiceRoller = () => {
 
   // Render a single die
   const renderDie = (value, index) => {
+    // Determine if this die is part of a special roll
+    const isSpecial = !isRolling && specialRoll !== null;
+
+    // Apply different animations based on the roll type
+    const getAnimationClass = () => {
+      if (isRolling) return '';
+      if (specialRoll === 'double' || specialRoll === 'triple')
+        return 'shaking';
+      if (specialRoll === 'sequence') return 'bouncing';
+      return '';
+    };
+
     return (
       <motion.div
         key={index}
-        className={`die ${!isRolling ? `die-${value}` : ''}`}
+        className={`die ${!isRolling ? `die-${value}` : ''} ${
+          isSpecial ? 'special' : ''
+        } ${getAnimationClass()}`}
         animate={{
           rotate: isRolling ? [0, 360, 720, 1080] : 0,
-          scale: isRolling ? [1, 1.2, 0.8, 1] : 1,
+          scale: isRolling ? [1, 1.2, 0.8, 1] : isSpecial ? [1, 1.1, 1] : 1,
+          x: isRolling ? [0, -10, 10, -10, 10, 0] : 0,
+          y: isRolling ? [0, -5, 5, -5, 5, 0] : 0,
+          boxShadow: isSpecial
+            ? [
+                '0 4px 8px rgba(0,0,0,0.2)',
+                '0 0 15px rgba(255,215,0,0.7)',
+                '0 4px 8px rgba(0,0,0,0.2)',
+              ]
+            : '0 4px 8px rgba(0,0,0,0.2)',
         }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
+        transition={{
+          duration: isRolling ? 0.6 : 0.3,
+          ease: 'easeInOut',
+          x: { duration: 0.3, ease: 'easeInOut' },
+          y: { duration: 0.3, ease: 'easeInOut' },
+          scale: {
+            duration: isSpecial ? 1.5 : 0.6,
+            repeat: isSpecial ? Infinity : 0,
+            repeatType: 'reverse',
+          },
+          boxShadow: {
+            duration: isSpecial ? 1.5 : 0.6,
+            repeat: isSpecial ? Infinity : 0,
+            repeatType: 'reverse',
+          },
+        }}
       >
         {isRolling && '?'}
       </motion.div>
@@ -112,10 +163,12 @@ const DiceRoller = () => {
       </div>
 
       {/* Dice Display */}
-      <div className="flex gap-4 justify-center">
-        {diceValues
-          .slice(0, diceCount)
-          .map((value, index) => renderDie(value, index))}
+      <div className="dice-container">
+        <div className="flex gap-4 justify-center">
+          {diceValues
+            .slice(0, diceCount)
+            .map((value, index) => renderDie(value, index))}
+        </div>
       </div>
 
       {/* Total Value */}
@@ -140,7 +193,24 @@ const DiceRoller = () => {
       <motion.button
         onClick={rollDice}
         className="mt-4 px-8 py-4 bg-red-500 text-white text-xl font-bold rounded-full shadow-lg hover:bg-red-600 transition-colors"
-        whileTap={{ scale: 0.95 }}
+        whileHover={{
+          scale: 1.05,
+          boxShadow: '0 0 15px rgba(255, 0, 0, 0.5)',
+        }}
+        whileTap={{
+          scale: 0.95,
+          boxShadow: '0 0 5px rgba(255, 0, 0, 0.5)',
+        }}
+        animate={{
+          scale: isRolling ? [1, 1.05, 0.95, 1.05, 0.95, 1] : 1,
+          rotate: isRolling ? [0, -1, 1, -1, 1, 0] : 0,
+        }}
+        transition={{
+          duration: 0.5,
+          ease: 'easeInOut',
+          scale: { repeat: isRolling ? Infinity : 0 },
+          rotate: { repeat: isRolling ? Infinity : 0 },
+        }}
         disabled={isRolling}
       >
         {isRolling ? 'Rolling...' : 'Roll Dice'}
