@@ -1,0 +1,8 @@
+{
+  "appId": "com.speeddice.app",
+  "appName": "SpeedDice",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
