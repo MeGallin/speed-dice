@@ -7,7 +7,6 @@ import GameHistory from './components/GameHistory';
 function App() {
   return (
     <div className="app">
-      <h1 className="text-3xl font-bold text-center my-6">Speed Dice</h1>
       <div className="max-w-4xl mx-auto">
         <GameSettings />
         <DiceRoller />
