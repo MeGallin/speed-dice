@@ -2,12 +2,11 @@ import { useState } from 'react';
 import './App.css';
 import './styles/BoardGameTheme.css';
 import DiceRoller from './components/DiceRoller';
-import DiceTest from './components/DiceTest';
 import GameSettings from './components/GameSettings';
-import GameHistory from './components/GameHistory';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [showNewDice, setShowNewDice] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="app board-game-bg">
@@ -16,30 +15,41 @@ function App() {
           Speed Dice
         </h1>
 
+        {/* Toggle Button */}
         <div className="flex justify-center mb-4">
-          <button
-            onClick={() => setShowNewDice(!showNewDice)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+          <motion.button
+            onClick={() => setShowSettings(!showSettings)}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg shadow-md hover:from-purple-700 hover:to-indigo-800 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {showNewDice ? 'Switch to Classic Dice' : 'Switch to 3D Dice'}
-          </button>
+            {showSettings
+              ? 'Hide Settings & History'
+              : 'Show Settings & History'}
+          </motion.button>
         </div>
 
-        {!showNewDice ? (
-          <>
-            <div className="game-card">
-              <GameSettings />
-            </div>
-            <div className="game-card">
-              <DiceRoller />
-            </div>
-            <GameHistory />
-          </>
-        ) : (
-          <div className="game-card">
-            <DiceTest />
-          </div>
-        )}
+        {/* Settings Panel */}
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="game-card">
+                <GameSettings />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Dice Roller (always visible) */}
+        <div className="game-card">
+          <DiceRoller />
+        </div>
       </div>
     </div>
   );
