@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { atom, useAtom } from 'jotai';
 import './Dice.css';
+import Dice from './Dice';
 import { rollHistoryAtom } from './GameHistory';
 
 // Function to get player icon based on index
@@ -181,73 +182,21 @@ const DiceRoller = () => {
     setRollHistory([]);
   };
 
-  // Render a single die
-  const renderDie = (value, index) => {
-    // Determine if this die is part of a special roll
-    const isSpecial = !isRolling && specialRoll !== null;
-
-    // Apply different animations based on the roll type
-    const getAnimationClass = () => {
-      if (isRolling) return 'enhanced-rolling';
-      if (specialRoll === 'double' || specialRoll === 'triple')
-        return 'shaking';
-      if (specialRoll === 'sequence') return 'bouncing';
-      return '';
-    };
-
-    return (
-      <motion.div
-        key={index}
-        className={`die enhanced-die ${!isRolling ? `die-${value}` : ''} ${
-          isSpecial ? 'special' : ''
-        } ${getAnimationClass()}`}
-        animate={{
-          rotate: isRolling ? [0, 360, 720, 1080] : 0,
-          scale: isRolling ? [1, 1.2, 0.8, 1] : isSpecial ? [1, 1.1, 1] : 1,
-          x: isRolling ? [0, -15, 15, -15, 15, 0] : 0,
-          y: isRolling ? [0, -20, 10, -15, 5, 0] : 0,
-          boxShadow: isSpecial
-            ? [
-                '0 4px 8px rgba(0,0,0,0.2)',
-                '0 0 20px rgba(255, 215, 0, 0.8)',
-                '0 4px 8px rgba(0,0,0,0.2)',
-              ]
-            : '0 4px 8px rgba(0,0,0,0.2)',
-        }}
-        transition={{
-          duration: isRolling ? 0.8 : 0.3,
-          ease: 'easeInOut',
-          x: { duration: 0.4, ease: 'easeInOut' },
-          y: { duration: 0.4, ease: 'easeInOut' },
-          scale: {
-            duration: isSpecial ? 1.5 : 0.6,
-            repeat: isSpecial ? Infinity : 0,
-            repeatType: 'reverse',
-          },
-          boxShadow: {
-            duration: isSpecial ? 1.5 : 0.6,
-            repeat: isSpecial ? Infinity : 0,
-            repeatType: 'reverse',
-          },
-        }}
-      >
-        {isRolling ? (
-          <motion.span
-            animate={{ opacity: [1, 0.5, 1], rotate: [0, 180, 360] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            className="text-2xl"
-          >
-            ?
-          </motion.span>
-        ) : null}
-      </motion.div>
-    );
+  // Handle individual dice roll completion
+  const handleDiceRoll = (index, value) => {
+    // Update the specific die value
+    const newValues = [...diceValues];
+    newValues[index] = value;
+    setDiceValues(newValues);
   };
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       {/* Top Controls Row - Side by Side */}
-      <div className="w-full max-w-md grid grid-cols-2 gap-3 mb-2">
+      <div
+        className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3 mb-2
+"
+      >
         {/* Dice Switch */}
 
         <div className="flex items-center justify-center bg-gray-100 text-white p-3 rounded-lg shadow-md">
@@ -257,7 +206,7 @@ const DiceRoller = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {diceCount === 2 ? '3 Dice' : '2 Dice'}
+            {diceCount === 2 ? 'Change to 3 Dice' : 'Change to 2 Dice'}
           </motion.button>
         </div>
 
@@ -354,9 +303,17 @@ const DiceRoller = () => {
 
         {/* Dice */}
         <div className="flex justify-around py-6 px-4">
-          {diceValues
-            .slice(0, diceCount)
-            .map((value, index) => renderDie(value, index))}
+          {diceValues.slice(0, diceCount).map((value, index) => (
+            <Dice
+              key={index}
+              value={value}
+              rolling={isRolling}
+              onRoll={(value) => handleDiceRoll(index, value)}
+              size={80}
+              primaryColor={specialRoll ? '#fff3cd' : 'white'}
+              dotColor="black"
+            />
+          ))}
         </div>
 
         {/* Special Roll Display */}
