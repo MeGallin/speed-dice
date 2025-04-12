@@ -30,18 +30,32 @@ import { provideFeedback } from '../utils/feedbackEffects';
 // Atoms for global state
 export const diceCountAtom = atom(2); // Default to 2 dice
 export const diceValuesAtom = atom([1, 1, 1]); // Default values for 3 dice
-export const totalValueAtom = atom((get) => {
-  const values = get(diceValuesAtom);
-  const count = get(diceCountAtom);
-  return calculateTotal(values.slice(0, count));
-});
+// Create a derived atom for the total value
+export const totalValueAtom = atom(
+  // Read function
+  (get) => {
+    const values = get(diceValuesAtom);
+    const count = get(diceCountAtom);
+
+    // Make sure we're only using the active dice values
+    const activeValues = values.slice(0, count);
+
+    // Calculate the total using only the active values
+    let total = 0;
+    for (let i = 0; i < activeValues.length; i++) {
+      total += activeValues[i];
+    }
+
+    return total;
+  },
+);
 export const specialRollAtom = atom(null); // For storing special roll types
 export const playerCountAtom = atom(2); // Default to 2 players
 export const currentPlayerAtom = atom(0); // Default to first player
 export const hasRolledAtom = atom(false); // Track if current player has rolled
 export const gameStartedAtom = atom(false); // Track if the game has started
 
-const DiceRoller = () => {
+const DiceRoller = ({ onResetGame }) => {
   // Local state for animation
   const [isRolling, setIsRolling] = useState(false);
   const [isAnimatingNextPlayer, setIsAnimatingNextPlayer] = useState(false);
@@ -97,24 +111,19 @@ const DiceRoller = () => {
 
     // Generate random dice values after a short delay
     setTimeout(() => {
-      const newValues = generateDiceValues(diceCount);
+      // Generate completely new dice values
+      const newValues = Array(3)
+        .fill(0)
+        .map(() => Math.floor(Math.random() * 6) + 1);
 
-      // If we're only using 2 dice, keep the third dice value but don't show it
-      if (diceCount === 2) {
-        newValues.push(diceValues[2] || 1);
-      }
+      // Update the dice values state with the new values
+      setDiceValues(newValues);
 
-      // Store the generated values to ensure consistency
-      const finalValues = [...newValues];
-
-      // Log the values for debugging
-      console.log('Generated dice values:', finalValues.slice(0, diceCount));
-
-      // Update the dice values state
-      setDiceValues(finalValues);
+      // Get the actual dice values being used (slice to the correct count)
+      const activeValues = newValues.slice(0, diceCount);
 
       // Check for special roll patterns based on enabled rules
-      const rollType = getSpecialRollType(finalValues.slice(0, diceCount));
+      const rollType = getSpecialRollType(activeValues);
 
       // Only set special roll if the corresponding rule is enabled
       let effectiveRollType = null;
@@ -130,14 +139,13 @@ const DiceRoller = () => {
         provideFeedback(effectiveRollType, enableVibration, enableSound);
       }
 
-      // Calculate total for the rolled dice
-      const total = calculateTotal(finalValues.slice(0, diceCount));
-      console.log('Calculated total:', total);
+      // Calculate total for the rolled dice directly
+      const total = activeValues.reduce((sum, val) => sum + val, 0);
 
       // Add roll to history
       setRollHistory((prev) => [
         {
-          values: finalValues.slice(0, diceCount),
+          values: newValues.slice(0, diceCount),
           total,
           specialRoll: effectiveRollType,
           player: currentPlayer,
@@ -152,8 +160,30 @@ const DiceRoller = () => {
 
   // Toggle between 2 and 3 dice
   const toggleDiceCount = () => {
-    setDiceCount(diceCount === 2 ? 3 : 2);
+    const newCount = diceCount === 2 ? 3 : 2;
+
+    // Update the dice count
+    setDiceCount(newCount);
+
+    // Reset special roll
     setSpecialRoll(null);
+
+    // Generate completely new dice values when switching
+    const newValues = [];
+    for (let i = 0; i < newCount; i++) {
+      newValues.push(Math.floor(Math.random() * 6) + 1);
+    }
+
+    // If we need 3 values but only generated 2, add a third
+    if (newValues.length < 3) {
+      newValues.push(Math.floor(Math.random() * 6) + 1);
+    }
+
+    // Update the dice values
+    setDiceValues(newValues);
+
+    // Force a re-render of the total by setting hasRolled to false
+    setHasRolled(false);
   };
 
   // Handle next player button click
@@ -180,29 +210,28 @@ const DiceRoller = () => {
     }, 300);
   };
 
-  // Reset the game state
-  const resetGame = () => {
-    setGameStarted(false);
-    setHasRolled(false);
-    setCurrentPlayer(0);
-    setSpecialRoll(null);
-    setDiceValues([1, 1, 1]);
-    setRollHistory([]);
-  };
+  // Reset the game state - this is called from the App component
+  useEffect(() => {
+    if (!gameStarted) {
+      // Reset local state when gameStarted becomes false
+      setHasRolled(false);
+      setCurrentPlayer(0);
+      setSpecialRoll(null);
+      setDiceValues([1, 1, 1]);
+      setDiceCount(2); // Reset to default 2 dice
+    }
+  }, [gameStarted]);
+
+  // No additional effects needed
 
   // Handle individual dice roll completion
   const handleDiceRoll = (index, value) => {
     // Update the specific die value
     const newValues = [...diceValues];
     newValues[index] = value;
-    setDiceValues(newValues);
 
-    // Log the updated values for debugging
-    console.log(`Die ${index + 1} rolled: ${value}`);
-    console.log(`Current dice values: ${newValues.slice(0, diceCount)}`);
-    console.log(
-      `Total should be: ${calculateTotal(newValues.slice(0, diceCount))}`,
-    );
+    // Update the dice values state
+    setDiceValues(newValues);
   };
 
   return (
@@ -214,86 +243,22 @@ const DiceRoller = () => {
       >
         {/* Dice Switch */}
 
-        <div className="flex items-center justify-center bg-gray-100 text-white p-3 rounded-lg shadow-md">
+        <div className="flex items-center justify-center p-3">
           <motion.button
             onClick={toggleDiceCount}
-            className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-bold text-sm"
+            className="dice-count-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {diceCount === 2 ? '3 dice?...' : '2 dice?...'}
+            {diceCount === 2 ? '3 Dice?' : '2 Dice?'}
           </motion.button>
         </div>
 
         {/* Current Player Display */}
-        <div className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg">
-          <div className="flex-shrink-0">
-            <motion.div
-              className={`player-token w-10 h-10 text-lg ${
-                playerColors[currentPlayer].split(' ')[0]
-              }`}
-              animate={{
-                scale: [1, 1.05, 1],
-                boxShadow: [
-                  '0 4px 8px rgba(0,0,0,0.2)',
-                  '0 8px 16px rgba(0,0,0,0.3)',
-                  '0 4px 8px rgba(0,0,0,0.2)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatType: 'reverse',
-              }}
-            >
-              {getPlayerIcon(currentPlayer)}
-            </motion.div>
-          </div>
-          <div className="flex-grow">
-            <div className="text-xs font-medium text-gray-500">
-              Current Player:
-            </div>
-            <div
-              className={`font-bold ${
-                currentPlayer === 0
-                  ? 'text-blue-600'
-                  : currentPlayer === 1
-                  ? 'text-red-600'
-                  : currentPlayer === 2
-                  ? 'text-green-600'
-                  : currentPlayer === 3
-                  ? 'text-yellow-600'
-                  : currentPlayer === 4
-                  ? 'text-purple-600'
-                  : 'text-pink-600'
-              }`}
-            >
-              Player {currentPlayer + 1}
-            </div>
-          </div>
-          <div className="flex-shrink-0">
-            {/* Player Tokens - Smaller to fit 6 players */}
-            <div className="flex flex-wrap gap-1 max-w-[90px] justify-end">
-              {Array.from({ length: playerCount }).map((_, index) => (
-                <motion.div
-                  key={index}
-                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
-                    index === currentPlayer
-                      ? playerColors[index].split(' ')[0]
-                      : 'bg-gray-300'
-                  } ${
-                    index === currentPlayer ? 'text-white' : 'text-gray-700'
-                  }`}
-                  animate={{
-                    scale: index === currentPlayer ? 1.2 : 1,
-                    y: index === currentPlayer ? -2 : 0,
-                  }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  {index + 1}
-                </motion.div>
-              ))}
-            </div>
+        <div className="flex items-center justify-center p-3">
+          <div className="player-button">
+            <div className="avatar">{getPlayerIcon(currentPlayer)}</div>
+            <span>Current Player {currentPlayer + 1}</span>
           </div>
         </div>
       </div>
@@ -315,6 +280,9 @@ const DiceRoller = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Spacer for layout consistency */}
+        <div className="h-2"></div>
 
         {/* Dice */}
         <div className="flex justify-around py-6 px-4">
@@ -393,16 +361,23 @@ const DiceRoller = () => {
             (hasRolled && !(specialRoll === 'double' && doubleTrouble))
           }
         >
-          <div className="flex items-center justify-center gap-2">
-            {isRolling ? (
-              <span>Rolling...</span>
-            ) : hasRolled && !(specialRoll === 'double' && doubleTrouble) ? (
-              <span>Waiting for Next Player</span>
-            ) : (
-              <>
-                <span>Roll Dice</span>
-                <span className="text-xl">🎲</span>
-              </>
+          <div className="flex flex-col items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-2">
+              {isRolling ? (
+                <span>Rolling...</span>
+              ) : hasRolled && !(specialRoll === 'double' && doubleTrouble) ? (
+                <span>Waiting for Next Player</span>
+              ) : (
+                <>
+                  <span>Roll Dice</span>
+                  <span className="text-xl">🎲</span>
+                </>
+              )}
+            </div>
+            {!isRolling && !hasRolled && (
+              <span className="text-sm font-normal opacity-80">
+                Player {currentPlayer + 1}'s turn {getPlayerIcon(currentPlayer)}
+              </span>
             )}
           </div>
         </motion.button>
@@ -430,43 +405,20 @@ const DiceRoller = () => {
               },
             }}
           >
-            <div className="flex items-center justify-center gap-2">
-              <span>Next Turn</span>
-              <span className="text-xl">➡️</span>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <div className="flex items-center justify-center gap-2">
+                <span>
+                  Pass Dice to Player {((currentPlayer + 1) % playerCount) + 1}
+                </span>
+                <span className="text-xl">
+                  {getPlayerIcon((currentPlayer + 1) % playerCount)}
+                </span>
+              </div>
+              <span className="text-sm font-normal opacity-80">
+                Click to continue
+              </span>
             </div>
           </motion.button>
-        )}
-
-        {/* Turn Indicators */}
-        {!isRolling && !hasRolled && (
-          <p className="text-center text-gray-600 font-medium">
-            Player {currentPlayer + 1}'s turn {getPlayerIcon(currentPlayer)}
-          </p>
-        )}
-
-        {hasRolled && !(specialRoll === 'double' && doubleTrouble) && (
-          <p className="text-center text-green-600 font-medium">
-            Click "Next Turn" to continue with Player{' '}
-            {((currentPlayer + 1) % playerCount) + 1}{' '}
-            {getPlayerIcon((currentPlayer + 1) % playerCount)}
-          </p>
-        )}
-
-        {/* Reset Game Button */}
-        {gameStarted && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <motion.button
-              onClick={resetGame}
-              className="w-full p-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Reset Game
-            </motion.button>
-            <p className="text-xs text-gray-500 mt-1 text-center">
-              This will reset all game progress and allow changing player count
-            </p>
-          </div>
         )}
       </div>
     </div>

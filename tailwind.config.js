@@ -35,6 +35,10 @@ export default {
       },
       colors: {
         'felt-green': '#0f6b3c',
+        'speed-purple': '#5d2e8c',
+        'alert-red': '#e74c3c',
+        'player-blue': '#3498db',
+        cream: '#f9f3e0',
       },
     },
   },
