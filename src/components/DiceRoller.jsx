@@ -104,10 +104,17 @@ const DiceRoller = () => {
         newValues.push(diceValues[2] || 1);
       }
 
-      setDiceValues(newValues);
+      // Store the generated values to ensure consistency
+      const finalValues = [...newValues];
+
+      // Log the values for debugging
+      console.log('Generated dice values:', finalValues.slice(0, diceCount));
+
+      // Update the dice values state
+      setDiceValues(finalValues);
 
       // Check for special roll patterns based on enabled rules
-      const rollType = getSpecialRollType(newValues.slice(0, diceCount));
+      const rollType = getSpecialRollType(finalValues.slice(0, diceCount));
 
       // Only set special roll if the corresponding rule is enabled
       let effectiveRollType = null;
@@ -124,12 +131,13 @@ const DiceRoller = () => {
       }
 
       // Calculate total for the rolled dice
-      const total = calculateTotal(newValues.slice(0, diceCount));
+      const total = calculateTotal(finalValues.slice(0, diceCount));
+      console.log('Calculated total:', total);
 
       // Add roll to history
       setRollHistory((prev) => [
         {
-          values: newValues.slice(0, diceCount),
+          values: finalValues.slice(0, diceCount),
           total,
           specialRoll: effectiveRollType,
           player: currentPlayer,
@@ -188,6 +196,13 @@ const DiceRoller = () => {
     const newValues = [...diceValues];
     newValues[index] = value;
     setDiceValues(newValues);
+
+    // Log the updated values for debugging
+    console.log(`Die ${index + 1} rolled: ${value}`);
+    console.log(`Current dice values: ${newValues.slice(0, diceCount)}`);
+    console.log(
+      `Total should be: ${calculateTotal(newValues.slice(0, diceCount))}`,
+    );
   };
 
   return (
@@ -206,7 +221,7 @@ const DiceRoller = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {diceCount === 2 ? 'Change to 3 Dice' : 'Change to 2 Dice'}
+            {diceCount === 2 ? '3 dice?...' : '2 dice?...'}
           </motion.button>
         </div>
 

@@ -31,17 +31,19 @@ export default function Dice({
     setIsRolling(rolling);
 
     if (rolling) {
+      // During rolling animation, show random values
       const rollDuration = 1000 + Math.random() * 1000;
       const rollInterval = setInterval(() => {
         setCurrentValue(Math.floor(Math.random() * 6) + 1);
       }, 100);
 
+      // When rolling stops, use the value provided by the parent
       const rollTimeout = setTimeout(() => {
         clearInterval(rollInterval);
-        const finalValue = Math.floor(Math.random() * 6) + 1;
-        setCurrentValue(finalValue);
+        setCurrentValue(value);
         setIsRolling(false);
-        if (onRoll) onRoll(finalValue);
+        // Notify parent that rolling is complete, but use the parent-provided value
+        if (onRoll) onRoll(value);
       }, rollDuration);
 
       return () => {
@@ -49,9 +51,14 @@ export default function Dice({
         clearTimeout(rollTimeout);
       };
     }
-  }, [rolling, onRoll]);
+  }, [rolling, onRoll, value]);
 
   const handleClick = () => {
+    // We'll disable direct clicking on dice to ensure consistency
+    // All dice rolling should be controlled by the parent component
+    // This ensures the values and totals stay in sync
+    // If you want to re-enable direct clicking, use the parent's value:
+    /*
     if (!isRolling && onRoll) {
       setIsRolling(true);
       const rollDuration = 1000 + Math.random() * 1000;
@@ -61,12 +68,12 @@ export default function Dice({
 
       const rollTimeout = setTimeout(() => {
         clearInterval(rollInterval);
-        const finalValue = Math.floor(Math.random() * 6) + 1;
-        setCurrentValue(finalValue);
+        setCurrentValue(value);
         setIsRolling(false);
-        onRoll(finalValue);
+        onRoll(value);
       }, rollDuration);
     }
+    */
   };
 
   // Determine which face to show based on the current value
@@ -350,7 +357,7 @@ export default function Dice({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .dice-container {
           display: inline-block;
         }
