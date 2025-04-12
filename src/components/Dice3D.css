@@ -1,0 +1,102 @@
+/* 3D Dice Styling */
+
+.dice-container {
+  perspective: 600px;
+  perspective-origin: 50% 50%;
+  display: inline-block;
+}
+
+.dice {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateY(0deg);
+}
+
+.dice.rolling {
+  animation: roll 1.5s ease-out;
+}
+
+@keyframes roll {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(360deg) rotateY(180deg);
+  }
+  50% {
+    transform: rotateX(720deg) rotateY(360deg);
+  }
+  75% {
+    transform: rotateX(1080deg) rotateY(540deg);
+  }
+  100% {
+    transform: rotateX(1440deg) rotateY(720deg);
+  }
+}
+
+.face {
+  position: absolute;
+  border-radius: 10%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dot {
+  border-radius: 50%;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  position: absolute;
+}
+
+.center-dot {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.top-left {
+  top: 20%;
+  left: 20%;
+}
+
+.top-right {
+  top: 20%;
+  right: 20%;
+}
+
+.middle-left {
+  top: 50%;
+  left: 20%;
+  transform: translateY(-50%);
+}
+
+.middle-right {
+  top: 50%;
+  right: 20%;
+  transform: translateY(-50%);
+}
+
+.bottom-left {
+  bottom: 20%;
+  left: 20%;
+}
+
+.bottom-right {
+  bottom: 20%;
+  right: 20%;
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+  .dice-container {
+    perspective: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dice-container {
+    perspective: 300px;
+  }
+}
