@@ -20,34 +20,27 @@ export default function Dice({
   rolling = false,
   onRoll,
 }) {
-  const [currentValue, setCurrentValue] = useState(value);
+  // Use the value prop directly instead of maintaining a separate state
+  // This ensures that the dice always shows the value from the parent component
   const [isRolling, setIsRolling] = useState(rolling);
 
-  useEffect(() => {
-    setCurrentValue(value);
-  }, [value]);
-
+  // Handle rolling animation
   useEffect(() => {
     setIsRolling(rolling);
 
     if (rolling) {
-      // During rolling animation, show random values
+      // When rolling stops, notify parent that rolling is complete
       const rollDuration = 1000 + Math.random() * 1000;
-      const rollInterval = setInterval(() => {
-        setCurrentValue(Math.floor(Math.random() * 6) + 1);
-      }, 100);
-
-      // When rolling stops, use the value provided by the parent
       const rollTimeout = setTimeout(() => {
-        clearInterval(rollInterval);
-        setCurrentValue(value);
         setIsRolling(false);
-        // Notify parent that rolling is complete, but use the parent-provided value
-        if (onRoll) onRoll(value);
+
+        // Notify parent that rolling is complete with the current value
+        if (onRoll) {
+          onRoll(value);
+        }
       }, rollDuration);
 
       return () => {
-        clearInterval(rollInterval);
         clearTimeout(rollTimeout);
       };
     }
@@ -76,9 +69,9 @@ export default function Dice({
     */
   };
 
-  // Determine which face to show based on the current value
+  // Determine which face to show based on the value prop
   const getFaceTransform = () => {
-    switch (currentValue) {
+    switch (value) {
       case 1:
         return 'rotateX(0deg) rotateY(0deg)'; // Front face (1)
       case 2:
@@ -92,7 +85,7 @@ export default function Dice({
       case 6:
         return 'rotateX(180deg) rotateY(0deg)'; // Back face (6)
       default:
-        return 'rotateX(0deg) rotateY(0deg)';
+        return 'rotateX(0deg) rotateY(0deg)'; // Default to 1
     }
   };
 

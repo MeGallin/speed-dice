@@ -22,8 +22,13 @@ export const generateDiceValues = (count) => {
  * @returns {boolean} - True if the roll is a double
  */
 export const isDouble = (values) => {
-  if (values.length !== 2) return false;
-  return values[0] === values[1];
+  // For 2 dice, check if they have the same value
+  if (values.length === 2) {
+    return values[0] === values[1];
+  }
+
+  // For other cases, return false
+  return false;
 };
 
 /**
@@ -70,18 +75,27 @@ export const isSequence = (values) => {
  * @returns {string|null} - Type of special roll ('double', 'triple', 'sequence') or null
  */
 export const getSpecialRollType = (values) => {
-  if (values.length === 2 && isDouble(values)) {
-    return 'double';
+  console.log('getSpecialRollType called with values:', values);
+
+  // Check for doubles (2 dice with the same value)
+  if (values.length === 2) {
+    const isDoubleRoll = values[0] === values[1];
+    console.log('Checking for double with 2 dice:', isDoubleRoll);
+    if (isDoubleRoll) return 'double';
   }
 
+  // Check for triples and sequences (3 dice)
   if (values.length === 3) {
-    if (isTriple(values)) {
+    // Check for triple (all 3 dice with the same value)
+    if (values[0] === values[1] && values[1] === values[2]) {
+      console.log('Triple detected!');
       return 'triple';
     }
 
-    if (isSequence(values)) {
-      return 'sequence';
-    }
+    // Check for sequence
+    const isSequenceRoll = isSequence(values);
+    console.log('Checking for sequence with 3 dice:', isSequenceRoll);
+    if (isSequenceRoll) return 'sequence';
   }
 
   return null;
@@ -129,7 +143,10 @@ export const getSpecialRollClass = (rollType) => {
  * @returns {number} - Sum of dice values
  */
 export const calculateTotal = (values) => {
-  return values.reduce((sum, value) => sum + value, 0);
+  console.log('calculateTotal called with values:', values);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  console.log('calculateTotal result:', total);
+  return total;
 };
 
 /**
