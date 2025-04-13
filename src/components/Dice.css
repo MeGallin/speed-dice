@@ -266,8 +266,8 @@
 
 @media (max-width: 480px) {
   .die {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
   }
 
   .die-1::after,
@@ -276,7 +276,7 @@
   .die-4::after,
   .die-5::after,
   .die-6::after {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .history-die {
