@@ -20,11 +20,11 @@ export const vibrate = (pattern) => {
 export const playSound = (soundName) => {
   // Map of sound names to their file paths
   const soundMap = {
-    roll: './sounds/dice-roll.mp3',
-    success: './sounds/success.mp3',
-    double: './sounds/double.mp3',
-    triple: './sounds/triple.mp3',
-    sequence: './sounds/sequence.mp3',
+    roll: '/sounds/dice-roll.mp3',
+    success: '/sounds/success.mp3',
+    double: '/sounds/double.mp3',
+    triple: '/sounds/triple.mp3',
+    sequence: '/sounds/sequence.mp3',
   };
 
   // Get the sound file path
@@ -36,17 +36,26 @@ export const playSound = (soundName) => {
     const audio = new Audio(soundPath);
     audio.volume = 0.5; // Set volume to 50%
 
+    // Add error handling for loading errors
+    audio.onerror = (e) => {
+      console.warn(
+        `Sound file ${soundPath} could not be loaded. Error: ${e.type}`,
+      );
+    };
+
     // Play the sound
     const playPromise = audio.play();
 
     // Handle play promise (required for some browsers)
     if (playPromise !== undefined) {
       playPromise.catch((error) => {
-        console.error('Error playing sound:', error);
+        // Silently handle the error to prevent console spam
+        console.warn(`Sound playback failed: ${error.message}`);
       });
     }
   } catch (error) {
-    console.error('Error creating audio:', error);
+    console.warn('Error creating audio:', error);
+    // Continue execution even if sound fails
   }
 };
 
@@ -61,33 +70,50 @@ export const provideFeedback = (
   enableVibration = true,
   enableSound = true,
 ) => {
-  // Vibration patterns (in milliseconds)
-  const vibrationPatterns = {
-    default: [100, 50, 100],
-    double: [100, 30, 100, 30, 300],
-    triple: [100, 30, 100, 30, 100, 30, 500],
-    sequence: [300, 100, 300],
-  };
+  try {
+    // Vibration patterns (in milliseconds)
+    const vibrationPatterns = {
+      default: [100, 50, 100],
+      double: [100, 30, 100, 30, 300],
+      triple: [100, 30, 100, 30, 100, 30, 500],
+      sequence: [300, 100, 300],
+    };
 
-  // Provide vibration feedback if enabled
-  if (enableVibration) {
-    const pattern = specialRoll
-      ? vibrationPatterns[specialRoll]
-      : vibrationPatterns.default;
-    vibrate(pattern);
-  }
-
-  // Provide sound feedback if enabled
-  if (enableSound) {
-    // Play roll sound first
-    playSound('roll');
-
-    // If there's a special roll, play the corresponding sound after a short delay
-    if (specialRoll) {
-      setTimeout(() => {
-        playSound(specialRoll);
-      }, 600); // Delay to let the roll sound finish
+    // Provide vibration feedback if enabled
+    if (enableVibration) {
+      try {
+        const pattern = specialRoll
+          ? vibrationPatterns[specialRoll]
+          : vibrationPatterns.default;
+        vibrate(pattern);
+      } catch (error) {
+        console.warn('Vibration failed:', error);
+      }
     }
+
+    // Provide sound feedback if enabled
+    if (enableSound) {
+      try {
+        // Play roll sound first
+        playSound('roll');
+
+        // If there's a special roll, play the corresponding sound after a short delay
+        if (specialRoll) {
+          setTimeout(() => {
+            try {
+              playSound(specialRoll);
+            } catch (error) {
+              console.warn('Special sound playback failed:', error);
+            }
+          }, 600); // Delay to let the roll sound finish
+        }
+      } catch (error) {
+        console.warn('Sound playback failed:', error);
+      }
+    }
+  } catch (error) {
+    console.warn('Feedback effect failed:', error);
+    // Continue execution even if feedback fails
   }
 };
 
