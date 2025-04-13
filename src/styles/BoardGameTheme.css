@@ -67,7 +67,17 @@ body {
   position: relative;
   overflow: hidden;
   border: none;
-  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Ensure the game card can grow properly */
+.game-card.flex-grow {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Remove the red gradient at the top */
@@ -317,5 +327,40 @@ body {
 
   .score-display {
     font-size: 1.5rem;
+  }
+}
+
+/* Additional responsive adjustments for better full-screen usage */
+@media (min-height: 700px) {
+  .board-game-bg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .game-card {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+/* Small screen optimizations */
+@media (max-width: 480px) {
+  .game-card {
+    padding: 0.75rem;
+    border-radius: 16px;
+  }
+
+  .roll-button {
+    font-size: 1.1rem;
+    padding: 0.6rem 1.2rem;
+  }
+
+  .special-roll-banner {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
   }
 }
