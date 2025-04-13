@@ -56,9 +56,32 @@ export const hasRolledAtom = atom(false); // Track if current player has rolled
 export const gameStartedAtom = atom(false); // Track if the game has started
 
 const DiceRoller = ({ onResetGame }) => {
-  // Local state for animation
+  // Local state for animation and responsive sizing
   const [isRolling, setIsRolling] = useState(false);
   const [isAnimatingNextPlayer, setIsAnimatingNextPlayer] = useState(false);
+  const [diceSize, setDiceSize] = useState(80); // Default size
+
+  // Adjust dice size based on screen width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 480) {
+        setDiceSize(52); // Larger mobile size as requested
+      } else if (window.innerWidth <= 768) {
+        setDiceSize(50); // Tablet size
+      } else {
+        setDiceSize(80); // Default size
+      }
+    };
+
+    // Set initial size
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Global state
   const [diceCount, setDiceCount] = useAtom(diceCountAtom);
@@ -235,30 +258,84 @@ const DiceRoller = ({ onResetGame }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
+    <div
+      className="max-w-4xl mx-auto p-4 flex flex-col justify-between"
+      style={{ height: '80vh' }}
+    >
       {/* Top Controls Row - Side by Side */}
-      <div
-        className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3 mb-2
-"
-      >
-        {/* Dice Switch */}
+      <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+        {/* Dice Toggle Switch */}
+        <div className="flex items-center justify-center p-1 bg-red-500 border-red-600 rounded-lg shadow-md">
+          <div className="flex items-center gap-2 p-1 w-full max-w-md">
+            <span
+              className={` ${
+                diceCount === 2 ? 'rounded-lg bg-blue-500 px-4' : 'opacity-50'
+              }`}
+            >
+              <span className="text-lg">🎲 🎲</span>
+            </span>
 
-        <div className="flex items-center justify-center p-3">
-          <motion.button
-            onClick={toggleDiceCount}
-            className="dice-count-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {diceCount === 2 ? '3 Dice?' : '2 Dice?'}
-          </motion.button>
+            <motion.div
+              className="relative inline-flex h-6 w-16 items-center rounded-full bg-[#fffdd0] cursor-pointer"
+              onClick={toggleDiceCount}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {/* Toggle Dot */}
+              <motion.span
+                className="absolute top-0 left-0 h-6 w-6 rounded-full bg-red-500 z-10"
+                animate={{
+                  x: diceCount === 2 ? 0 : 40, // Adjust x to match new width difference
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+
+              {/* Background Layer */}
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                animate={{
+                  backgroundColor: '#fffdd0',
+                }}
+                transition={{ duration: 0.2 }}
+              />
+
+              <span className="sr-only">Toggle dice count</span>
+            </motion.div>
+
+            <span
+              className={` ${
+                diceCount === 3 ? 'rounded-lg bg-blue-500 px-4' : 'opacity-50'
+              }`}
+            >
+              <span className="text-lg">🎲🎲🎲</span>
+            </span>
+          </div>
         </div>
 
-        {/* Current Player Display */}
-        <div className="flex items-center justify-center p-3">
-          <div className="player-button">
-            <div className="avatar">{getPlayerIcon(currentPlayer)}</div>
-            <span>Current Player {currentPlayer + 1}</span>
+        {/* Players Display */}
+        <div className="flex items-center justify-center p-1 bg-red-500 border-red-600 rounded-lg shadow-md">
+          <div className="flex flex-col items-center p-1 w-full max-w-md">
+            <div className="text-sm font-medium text-gray-600 mb-1">
+              {playerCount} PLAYERS
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 mb-2">
+              {Array.from({ length: playerCount }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                    index === currentPlayer
+                      ? 'bg-blue-500 text-white shadow-md transform scale-110'
+                      : 'bg-gray-100 text-gray-700'
+                  } transition-all duration-200`}
+                  title={`Player ${index + 1}`}
+                >
+                  {getPlayerIcon(index)}
+                </div>
+              ))}
+            </div>
+            <div className="text-sm font-bold text-white">
+              CURRENT: PLAYER {currentPlayer + 1}
+            </div>
           </div>
         </div>
       </div>
@@ -266,7 +343,7 @@ const DiceRoller = ({ onResetGame }) => {
       {/* Dice Display with Total Score */}
       <div className="w-full max-w-md relative">
         {/* Total Value - Centered above dice */}
-        <div className="flex justify-center mb-0">
+        {/* <div className="flex justify-center mb-0">
           <motion.div
             key={totalValue} // Force re-render on value change
             initial={{ opacity: 0, scale: 0.8 }}
@@ -279,20 +356,20 @@ const DiceRoller = ({ onResetGame }) => {
               </span>
             </div>
           </motion.div>
-        </div>
+        </div> */}
 
         {/* Spacer for layout consistency */}
         <div className="h-2"></div>
 
         {/* Dice */}
-        <div className="flex justify-around py-6 px-4">
+        <div className="flex justify-evenly py-6 px-4">
           {diceValues.slice(0, diceCount).map((value, index) => (
             <Dice
               key={index}
               value={value}
               rolling={isRolling}
               onRoll={(value) => handleDiceRoll(index, value)}
-              size={80}
+              size={diceSize}
               primaryColor={specialRoll ? '#fff3cd' : 'white'}
               dotColor="black"
             />
@@ -370,13 +447,16 @@ const DiceRoller = ({ onResetGame }) => {
               ) : (
                 <>
                   <span>Roll Dice</span>
-                  <span className="text-xl">🎲</span>
+                  <span className="text-2xl">🎲</span>
                 </>
               )}
             </div>
             {!isRolling && !hasRolled && (
               <span className="text-sm font-normal opacity-80">
-                Player {currentPlayer + 1}'s turn {getPlayerIcon(currentPlayer)}
+                Player {currentPlayer + 1}'s turn{' '}
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-md transform scale-110">
+                  {getPlayerIcon(currentPlayer)}
+                </span>
               </span>
             )}
           </div>
