@@ -27,8 +27,11 @@ function App() {
   };
 
   return (
-    <div className="app board-game-bg">
-      <div className="max-w-4xl mx-auto p-4" style={{ height: '86vh' }}>
+    <div className="app board-game-bg min-h-screen flex items-center justify-center">
+      <div
+        className="max-w-4xl w-full mx-auto p-4 flex flex-col"
+        style={{ minHeight: '100vh' }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2 ">
           {/* Settings Panel */}
           <div className="flex justify-center sm:justify-end gap-4">
@@ -56,25 +59,27 @@ function App() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {showSettings && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <div className="game-card">
-                <GameSettings />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="flex-grow flex flex-col">
+          <AnimatePresence>
+            {showSettings && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden w-full"
+              >
+                <div className="game-card">
+                  <GameSettings />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* Dice Roller (always visible) */}
-        <div className="game-card">
-          <DiceRoller onResetGame={resetGame} />
+          {/* Dice Roller (always visible) */}
+          <div className="game-card flex-grow">
+            <DiceRoller onResetGame={resetGame} />
+          </div>
         </div>
       </div>
     </div>
