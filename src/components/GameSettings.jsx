@@ -150,7 +150,7 @@ const GameSettings = () => {
         className="bg-white rounded-lg shadow-md mt-2 overflow-hidden"
       >
         {activeTab === 'settings' ? (
-          <div className="p-4">
+          <div className="p-2">
             <h3 className="game-card-title mb-4">Game Setup</h3>
 
             {/* Player Count Selector */}
