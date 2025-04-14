@@ -62,8 +62,10 @@ body {
   background-color: var(--cream);
   border-radius: 24px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 0.75rem; /* Base style from max-width: 480px */
+  margin-bottom: 1rem; /* Base style from max-width: 768px - applied from 481px upwards, overridden later */
+  border-radius: 16px; /* Base style from max-width: 480px */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   border: none;
@@ -134,8 +136,8 @@ body {
   color: white;
   font-family: var(--font-button);
   font-weight: bold;
-  font-size: 1.5rem;
-  padding: 1rem 2rem;
+  font-size: 1.1rem; /* Base style from max-width: 480px */
+  padding: 0.6rem 1.2rem; /* Base style from max-width: 480px */
   border-radius: 50px;
   border: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -158,7 +160,7 @@ body {
 /* Score display styling */
 .score-display {
   font-family: var(--font-text);
-  font-size: 2rem;
+  font-size: 1.5rem; /* Base style from max-width: 768px - applied from 481px upwards, overridden later */
   font-weight: bold;
   color: #333;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -170,10 +172,10 @@ body {
   background-color: var(--alert-red);
   color: var(--gold-yellow);
   font-family: var(--font-button);
-  font-size: 1.5rem;
+  font-size: 1.2rem; /* Base style from max-width: 480px */
   font-weight: bold;
   text-align: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem; /* Base style from max-width: 480px */
   border-radius: 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   margin: 1rem auto;
@@ -313,24 +315,53 @@ body {
   animation: scoreAppear 0.5s ease-out forwards;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* --- Mobile First Media Queries --- */
+
+/* Medium screens (tablets, larger phones) */
+@media (min-width: 481px) {
   .game-card {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: 1rem; /* Style from old max-width: 768px */
+    /* margin-bottom: 1rem; Inherited from base */
   }
 
   .roll-button {
-    font-size: 1.25rem;
-    padding: 0.75rem 1.5rem;
+    font-size: 1.25rem; /* Style from old max-width: 768px */
+    padding: 0.75rem 1.5rem; /* Style from old max-width: 768px */
   }
 
   .score-display {
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Style from old max-width: 768px */
+  }
+
+  .special-roll-banner {
+    /* Inherits base size/padding from 480px */
   }
 }
 
-/* Additional responsive adjustments for better full-screen usage */
+/* Large screens (desktops) */
+@media (min-width: 769px) {
+  .game-card {
+    padding: 1.5rem; /* Original base style */
+    margin-bottom: 1.5rem; /* Original base style */
+    border-radius: 24px; /* Original base style */
+  }
+
+  .roll-button {
+    font-size: 1.5rem; /* Original base style */
+    padding: 1rem 2rem; /* Original base style */
+  }
+
+  .score-display {
+    font-size: 2rem; /* Original base style */
+  }
+
+  .special-roll-banner {
+    font-size: 1.5rem; /* Original base style */
+    padding: 0.75rem 1.5rem; /* Original base style */
+  }
+}
+
+/* Height-based adjustments (can remain as is) */
 @media (min-height: 700px) {
   .board-game-bg {
     display: flex;
@@ -347,20 +378,4 @@ body {
   }
 }
 
-/* Small screen optimizations */
-@media (max-width: 480px) {
-  .game-card {
-    padding: 0.75rem;
-    border-radius: 16px;
-  }
-
-  .roll-button {
-    font-size: 1.1rem;
-    padding: 0.6rem 1.2rem;
-  }
-
-  .special-roll-banner {
-    font-size: 1.2rem;
-    padding: 0.5rem 1rem;
-  }
-}
+/* Removed old max-width media queries */

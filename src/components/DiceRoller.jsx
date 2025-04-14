@@ -56,32 +56,10 @@ export const hasRolledAtom = atom(false); // Track if current player has rolled
 export const gameStartedAtom = atom(false); // Track if the game has started
 
 const DiceRoller = ({ onResetGame }) => {
-  // Local state for animation and responsive sizing
+  // Local state for animation
   const [isRolling, setIsRolling] = useState(false);
   const [isAnimatingNextPlayer, setIsAnimatingNextPlayer] = useState(false);
-  const [diceSize, setDiceSize] = useState(80); // Default size
-
-  // Adjust dice size based on screen width
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 480) {
-        setDiceSize(52); // Larger mobile size as requested
-      } else if (window.innerWidth <= 768) {
-        setDiceSize(50); // Tablet size
-      } else {
-        setDiceSize(80); // Default size
-      }
-    };
-
-    // Set initial size
-    handleResize();
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Clean up
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Removed diceSize state and useEffect for JS-based sizing
 
   // Global state
   const [diceCount, setDiceCount] = useAtom(diceCountAtom);
@@ -369,7 +347,7 @@ const DiceRoller = ({ onResetGame }) => {
               value={value}
               rolling={isRolling}
               onRoll={(value) => handleDiceRoll(index, value)}
-              size={diceSize}
+              // Removed size prop - will be handled by CSS
               primaryColor={specialRoll ? '#fff3cd' : 'white'}
               dotColor="black"
             />
