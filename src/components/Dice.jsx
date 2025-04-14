@@ -6,7 +6,6 @@ import './Dice3D.css';
  *
  * @param {Object} props
  * @param {number} [props.value=1] - Current value of the dice (1-6)
- * @param {number} [props.size=100] - Size of the dice in pixels
  * @param {string} [props.primaryColor="white"] - Background color of the dice
  * @param {string} [props.dotColor="black"] - Color of the dots on the dice
  * @param {boolean} [props.rolling=false] - Whether the dice is currently rolling
@@ -14,7 +13,6 @@ import './Dice3D.css';
  */
 export default function Dice({
   value = 1,
-  size = 100,
   primaryColor = 'white',
   dotColor = 'black',
   rolling = false,
@@ -92,351 +90,148 @@ export default function Dice({
   return (
     <div
       className="dice-container"
-      style={{
-        width: `${size}px`,
-        height: `${size}px`,
-        perspective: `${size * 3}px`,
-        cursor: onRoll ? 'pointer' : 'default',
-      }}
+      // Removed inline styles related to size
+      style={{ cursor: onRoll ? 'pointer' : 'default' }}
       onClick={handleClick}
     >
       <div
         className={`dice ${isRolling ? 'rolling' : ''}`}
         style={{
           transform: isRolling ? '' : getFaceTransform(),
-          width: `${size}px`,
-          height: `${size}px`,
+          // Removed inline width/height
           transition: 'transform 0.5s ease-out',
+          // Pass CSS variables for colors
+          '--dice-primary-color': primaryColor,
+          '--dice-dot-color': dotColor,
         }}
       >
         {/* Face 1 */}
         <div
           className="face face-1"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot center-dot"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
 
         {/* Face 2 */}
         <div
           className="face face-2"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `rotateY(90deg) translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot top-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
 
         {/* Face 3 */}
         <div
           className="face face-3"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `rotateX(90deg) translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot top-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot center-dot"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
 
         {/* Face 4 */}
         <div
           className="face face-4"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `rotateX(-90deg) translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot top-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot top-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
 
         {/* Face 5 */}
         <div
           className="face face-5"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `rotateY(-90deg) translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot top-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot top-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot center-dot"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
 
         {/* Face 6 */}
         <div
           className="face face-6"
-          style={{
-            backgroundColor: primaryColor,
-            width: `${size}px`,
-            height: `${size}px`,
-            transform: `rotateY(180deg) translateZ(${size / 2}px)`,
-          }}
+          // Removed inline styles related to size and color
         >
           <div
             className="dot top-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot top-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot middle-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot middle-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-left"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
           <div
             className="dot bottom-right"
-            style={{
-              backgroundColor: dotColor,
-              width: `${size * 0.15}px`,
-              height: `${size * 0.15}px`,
-            }}
+            // Removed inline styles related to size and color
           ></div>
         </div>
       </div>
-
-      <style>{`
-        .dice-container {
-          display: inline-block;
-        }
-
-        .dice {
-          position: relative;
-          transform-style: preserve-3d;
-          transform: rotateX(0deg) rotateY(0deg);
-        }
-
-        .dice.rolling {
-          animation: roll 1.5s ease-out;
-        }
-
-        @keyframes roll {
-          0% {
-            transform: rotateX(0deg) rotateY(0deg);
-          }
-          25% {
-            transform: rotateX(360deg) rotateY(180deg);
-          }
-          50% {
-            transform: rotateX(720deg) rotateY(360deg);
-          }
-          75% {
-            transform: rotateX(1080deg) rotateY(540deg);
-          }
-          100% {
-            transform: rotateX(1440deg) rotateY(720deg);
-          }
-        }
-
-        .face {
-          position: absolute;
-          border-radius: 10%;
-          box-shadow: inset 0 0 ${size * 0.1}px rgba(0, 0, 0, 0.2);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .dot {
-          border-radius: 50%;
-          box-shadow: inset 0 0 ${size * 0.05}px rgba(0, 0, 0, 0.3);
-          position: absolute;
-        }
-
-        .center-dot {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        .top-left {
-          top: ${size * 0.2}px;
-          left: ${size * 0.2}px;
-        }
-
-        .top-right {
-          top: ${size * 0.2}px;
-          right: ${size * 0.2}px;
-        }
-
-        .middle-left {
-          top: 50%;
-          left: ${size * 0.2}px;
-          transform: translateY(-50%);
-        }
-
-        .middle-right {
-          top: 50%;
-          right: ${size * 0.2}px;
-          transform: translateY(-50%);
-        }
-
-        .bottom-left {
-          bottom: ${size * 0.2}px;
-          left: ${size * 0.2}px;
-        }
-
-        .bottom-right {
-          bottom: ${size * 0.2}px;
-          right: ${size * 0.2}px;
-        }
-      `}</style>
+      {/* Removed embedded style tag */}
     </div>
   );
 }

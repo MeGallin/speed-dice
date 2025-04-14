@@ -1,15 +1,27 @@
-/* 3D Dice Styling */
+/* 3D Dice Styling - Responsive & CSS Variables */
 
 .dice-container {
-  perspective: 600px;
+  /* Define base size for mobile */
+  --dice-size: 52px;
+  /* Define base perspective for mobile */
+  --dice-perspective: calc(
+    var(--dice-size) * 6
+  ); /* Adjusted perspective based on size */
+
+  width: var(--dice-size);
+  height: var(--dice-size);
+  perspective: var(--dice-perspective);
   perspective-origin: 50% 50%;
   display: inline-block;
 }
 
 .dice {
+  width: 100%; /* Use container size */
+  height: 100%; /* Use container size */
   position: relative;
   transform-style: preserve-3d;
   transform: rotateX(0deg) rotateY(0deg);
+  /* Colors are passed via inline style variables from Dice.jsx */
 }
 
 .dice.rolling {
@@ -36,20 +48,54 @@
 
 .face {
   position: absolute;
+  width: 100%; /* Use container size */
+  height: 100%; /* Use container size */
   border-radius: 10%;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 calc(var(--dice-size) * 0.1) rgba(0, 0, 0, 0.2);
+  background-color: var(
+    --dice-primary-color,
+    white
+  ); /* Use variable with fallback */
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
 }
 
+/* Face positioning using translateZ based on size */
+.face-1 {
+  transform: translateZ(calc(var(--dice-size) / 2));
+}
+.face-2 {
+  transform: rotateY(90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.face-3 {
+  transform: rotateX(90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.face-4 {
+  transform: rotateX(-90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.face-5 {
+  transform: rotateY(-90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.face-6 {
+  transform: rotateY(180deg) translateZ(calc(var(--dice-size) / 2));
+}
+
 .dot {
+  --dot-size: calc(var(--dice-size) * 0.15); /* Calculate dot size */
+  width: var(--dot-size);
+  height: var(--dot-size);
   border-radius: 50%;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 calc(var(--dot-size) * 0.3) rgba(0, 0, 0, 0.3); /* Adjusted shadow */
+  background-color: var(
+    --dice-dot-color,
+    black
+  ); /* Use variable with fallback */
   position: absolute;
 }
 
+/* Dot positioning using percentages (relative to face size) */
 .center-dot {
   top: 50%;
   left: 50%;
@@ -88,15 +134,20 @@
   right: 20%;
 }
 
-/* Responsive sizing */
-@media (max-width: 768px) {
+/* --- Mobile First Media Queries --- */
+
+/* Medium screens (tablets, larger phones) */
+@media (min-width: 481px) {
   .dice-container {
-    perspective: 400px;
+    --dice-size: 60px; /* Tablet size */
+    --dice-perspective: calc(var(--dice-size) * 6.5); /* Adjust perspective */
   }
 }
 
-@media (max-width: 480px) {
+/* Large screens (desktops) */
+@media (min-width: 769px) {
   .dice-container {
-    perspective: 300px;
+    --dice-size: 80px; /* Desktop size */
+    --dice-perspective: calc(var(--dice-size) * 7); /* Adjust perspective */
   }
 }
