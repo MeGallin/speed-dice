@@ -59,27 +59,41 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-grow flex flex-col">
-          <AnimatePresence>
-            {showSettings && (
+        <div
+          className="flex-grow flex flex-col relative overflow-y-auto"
+          style={{ perspective: '1000px' }}
+        >
+          <AnimatePresence mode="wait">
+            {showSettings ? (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden w-full"
+                key="settings"
+                initial={{ opacity: 0, x: -50, rotate: -10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 50, rotate: 10, scale: 0.9 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                className="w-full absolute inset-0"
+                style={{ transformOrigin: 'center center' }}
               >
-                <div className="game-card">
+                <div className="h-full">
                   <GameSettings />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="diceroller"
+                initial={{ opacity: 0, x: 50, rotate: 10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -50, rotate: -10, scale: 0.9 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                className="w-full absolute inset-0"
+                style={{ transformOrigin: 'center center' }}
+              >
+                <div className="game-card h-full">
+                  <DiceRoller onResetGame={resetGame} />
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Dice Roller (always visible) */}
-          <div className="game-card flex-grow">
-            <DiceRoller onResetGame={resetGame} />
-          </div>
         </div>
       </div>
     </div>
