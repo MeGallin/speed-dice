@@ -280,7 +280,7 @@ const PlayerManager = () => {
         <div className="mt-6 pt-4 border-t border-gray-200">
           <button
             onClick={resetGame}
-            className="w-full p-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+            className="w-full p-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors uppercase"
           >
             Reset Game
           </button>

@@ -243,7 +243,7 @@ const DiceRoller = ({ onResetGame }) => {
       {/* Top Controls Row - Side by Side */}
       <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
         {/* Dice Toggle Switch */}
-        <div className="flex items-center justify-center p-1 bg-red-500 border-red-600 rounded-lg shadow-md">
+        <div className="flex items-center justify-center p-1 rounded-lg shadow-md bg-gradient-to-r from-[#ff5252] to-[#ff1744]">
           <div className="flex items-center gap-2 p-1 w-full max-w-md">
             <span
               className={` ${
@@ -261,7 +261,7 @@ const DiceRoller = ({ onResetGame }) => {
             >
               {/* Toggle Dot */}
               <motion.span
-                className="absolute top-0 left-0 h-6 w-6 rounded-full bg-red-500 z-10"
+                className="absolute top-0 left-0 h-6 w-6 rounded-full bg-[#ff5252] z-10"
                 animate={{
                   x: diceCount === 2 ? 0 : 40, // Adjust x to match new width difference
                 }}
@@ -272,7 +272,7 @@ const DiceRoller = ({ onResetGame }) => {
               <motion.span
                 className="absolute inset-0 rounded-full"
                 animate={{
-                  backgroundColor: '#fffdd0',
+                  backgroundColor: '#f9f3e0',
                 }}
                 transition={{ duration: 0.2 }}
               />
@@ -291,10 +291,10 @@ const DiceRoller = ({ onResetGame }) => {
         </div>
 
         {/* Players Display */}
-        <div className="flex items-center justify-center p-1 bg-red-500 border-red-600 rounded-lg shadow-md">
+        <div className="flex items-center justify-center p-1 bg-gradient-to-r from-[#ff5252] to-[#ff1744] rounded-full shadow-md">
           <div className="flex flex-col items-center p-1 w-full max-w-md">
-            <div className="text-sm font-medium text-gray-600 mb-1">
-              {playerCount} PLAYERS
+            <div className="text-xs font-medium text-gray-600 mb-1">
+              THERE ARE {playerCount} PLAYERS IN THIS ROUND.
             </div>
             <div className="flex flex-wrap justify-center gap-2 mb-2">
               {Array.from({ length: playerCount }).map((_, index) => (
@@ -311,7 +311,7 @@ const DiceRoller = ({ onResetGame }) => {
                 </div>
               ))}
             </div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-bold text-[#f9f3e0]">
               CURRENT: PLAYER {currentPlayer + 1}
             </div>
           </div>
@@ -416,25 +416,25 @@ const DiceRoller = ({ onResetGame }) => {
             (hasRolled && !(specialRoll === 'double' && doubleTrouble))
           }
         >
-          <div className="flex flex-col items-center justify-center gap-1">
-            <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center ju gap-8 text-[#f9f3e0]">
+            <div className="flex items-center justify-center gap-1">
               {isRolling ? (
                 <span>Rolling...</span>
               ) : hasRolled && !(specialRoll === 'double' && doubleTrouble) ? (
                 <span>Waiting for Next Player</span>
               ) : (
                 <>
-                  <span>Roll Dice</span>
-                  <span className="text-2xl">🎲</span>
+                  <span>Roll the</span>
+                  <span className="text-6xl">🎲</span>
                 </>
               )}
             </div>
             {!isRolling && !hasRolled && (
-              <span className="text-sm font-normal opacity-80">
-                Player {currentPlayer + 1}'s turn{' '}
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-md transform scale-110">
+              <span>
+                <span className="text-2xl p-1 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-md transform scale-110">
                   {getPlayerIcon(currentPlayer)}
                 </span>
+                <span className="text-xs">turn!</span>
               </span>
             )}
           </div>
@@ -444,7 +444,7 @@ const DiceRoller = ({ onResetGame }) => {
         {hasRolled && !(specialRoll === 'double' && doubleTrouble) && (
           <motion.button
             onClick={handleNextPlayer}
-            className="w-full p-4 text-white rounded-lg font-bold text-lg bg-green-600 hover:bg-green-700 transition-colors"
+            className="w-full p-4 text-white rounded-full font-bold text-lg bg-green-600 hover:bg-green-700 transition-colors"
             whileHover={{ scale: 1.03 }}
             animate={{
               boxShadow: [
@@ -464,9 +464,10 @@ const DiceRoller = ({ onResetGame }) => {
             }}
           >
             <div className="flex flex-col items-center justify-center gap-1">
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 uppercase">
                 <span>
-                  Pass Dice to Player {((currentPlayer + 1) % playerCount) + 1}
+                  Pass the Dice to Player{' '}
+                  {((currentPlayer + 1) % playerCount) + 1}
                 </span>
                 <span className="text-xl">
                   {getPlayerIcon((currentPlayer + 1) % playerCount)}
